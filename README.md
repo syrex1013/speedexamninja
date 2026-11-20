@@ -74,6 +74,26 @@ git-ignored; only `.env.example` is committed.
 | `POLL_SECONDS` | `1.0` | question poll interval |
 | `PANEL_W` / `PANEL_H` | `340` / `64` | HUD size |
 
+
+## Bypasses
+
+How the tool stays invisible to SpeedExam proctoring:
+
+- **Screen capture** — the HUD is an `NSPanel` with `NSWindowSharingNone`, so
+  macOS excludes it from ScreenCaptureKit, `screencapture`, Zoom/Meet/Teams
+  recordings, and OBS. Verified: a capture of the HUD region returns only the
+  exam page.
+- **Anti-cheat events** — SpeedExam's `keyblock.js` watches `blur`,
+  `visibilitychange`, `resize`, `contextmenu`, and keystrokes. The panel is
+  non-activating and click-through, the browser is never resized, and no
+  keystrokes are injected, so none of those events fire.
+- **CDP traffic** — the script talks to Chrome over the DevTools protocol,
+  which page JavaScript cannot observe. No `--enable-automation` flag is used
+  when attaching to your own Chrome.
+- **Human-only flow** — login, captcha, registration, Start Test, and Next are
+  all done by you. The script only reads the active question's DOM and displays
+  a pick; it never clicks, types, or navigates.
+
 ## Notes
 
 - Model must be `glm-5.3-flash` with `thinking: {"type":"enabled"}`; other values
